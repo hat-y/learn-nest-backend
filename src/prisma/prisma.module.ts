@@ -1,29 +1,12 @@
 // Modulos Externos
-import { Global, Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { Module } from '@nestjs/common';
 
 // Modulos Internos
-import {
-  existsExtension,
-  restoreExtension,
-  softDeleteExtension,
-} from './prisma.extensions';
+import { PrismaService } from './prisma.service';
+import { PrismaProvider } from './prisma.provider';
 
-export const EXTENDED_PRISMA = Symbol('EXTENDED_PRISMA');
-
-@Global()
 @Module({
-  providers: [
-    PrismaService,
-    {
-      provide: EXTENDED_PRISMA,
-      useFactory: (prisma: PrismaService) =>
-        prisma
-          .$extends(existsExtension)
-          .$extends(softDeleteExtension)
-          .$extends(restoreExtension),
-      inject: [PrismaService],
-    },
-  ],
+  providers: [PrismaProvider, PrismaService],
+  exports: [PrismaService],
 })
 export class PrismaModule {}

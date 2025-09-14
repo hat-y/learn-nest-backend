@@ -1,24 +1,15 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from 'generated/prisma';
+import { Injectable, Type } from '@nestjs/common';
+import { PrismaProvider } from './prisma.provider';
+
+const ExtendedPrismaClient = class {
+  constructor(provider: PrismaProvider) {
+    return provider.withExtension();
+  }
+} as Type<ReturnType<PrismaProvider['withExtension']>>;
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleDestroy, OnModuleInit
-{
-  private static initialized = false;
-
-  async onModuleInit() {
-    if (!PrismaService.initialized) {
-      PrismaService.initialized = true;
-      await this.$connect();
-    }
-  }
-
-  async onModuleDestroy() {
-    if (PrismaService.initialized) {
-      PrismaService.initialized = false;
-      await this.$disconnect();
-    }
+export class PrismaService extends ExtendedPrismaClient {
+  constructor(provider: PrismaProvider) {
+    super(provider);
   }
 }
